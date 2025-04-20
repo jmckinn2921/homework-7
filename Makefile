@@ -1,25 +1,47 @@
-# Variables
+# ==== Compilers and Flags ====
 CXX = g++
+CC = gcc
 CXXFLAGS = -Wall -std=c++11
+CFLAGS = -Wall -std=c99
 
-# Targets
-TARGET = matrix_cpp
-OBJS = main.o Matrix.o
+# ==== Targets ====
+CPP_TARGET = matrix_cpp
+C_TARGET = matrix_c
 
-# Build target
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+# ==== Object Files ====
+CPP_OBJS = main.o Matrix.o
+C_OBJS = main_c.o matrix_c.o
 
-# Compile source files
-main.o: main.cpp Matrix.h
+# ==== Default Target ====
+all: $(CPP_TARGET) $(C_TARGET)
+
+# ==== C++ Build Rules ====
+$(CPP_TARGET): main.o Matrix.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+main.o: main.cpp matrixccp.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-Matrix.o: Matrix.cpp Matrix.h
+Matrix.o: Matrix.cpp matrixccp.h
 	$(CXX) $(CXXFLAGS) -c Matrix.cpp
 
-# run target
-run: $(TARGET)
-	./$(TARGET)
-# Clean build files
+# ==== C Build Rules ====
+$(C_TARGET): main_c.o matrix_c.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+main_c.o: main.c matrix.h
+	$(CC) $(CFLAGS) -c -o $@ main.c
+
+matrix_c.o: Matrix.c matrix.h
+	$(CC) $(CFLAGS) -c -o $@ Matrix.c
+
+# ==== Run Targets ====
+run_cpp: $(CPP_TARGET)
+	./$(CPP_TARGET)
+
+run_c: $(C_TARGET)
+	./$(C_TARGET)
+
+# ==== Clean ====
 clean:
-	rm -f $(TARGET) *.o
+	rm -f *.o $(CPP_TARGET) $(C_TARGET)
